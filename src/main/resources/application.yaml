@@ -1,0 +1,8 @@
+spring:
+  application:
+    name: rede-social
+  datasource:
+    url: jdbc:h2:mem:rede-social
+  h2:
+    console:
+      enabled: true
