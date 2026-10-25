@@ -6,6 +6,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -36,21 +37,40 @@ public class GlobalExceptionHandler {
 		return new ErroResponse("Valor inválido para o parâmetro '" + exception.getName() + "'");
 	}
 
-	@ExceptionHandler(OrdemFeedInvalidaException.class)
+	@ExceptionHandler(MissingServletRequestParameterException.class)
 	@ResponseStatus(HttpStatus.BAD_REQUEST)
-	public ErroResponse tratarOrdemInvalida(OrdemFeedInvalidaException exception) {
+	public ErroResponse tratarParametroAusente(MissingServletRequestParameterException exception) {
+		return new ErroResponse("O parâmetro '" + exception.getParameterName() + "' é obrigatório");
+	}
+
+	@ExceptionHandler({OrdemFeedInvalidaException.class, ReservaInvalidaException.class})
+	@ResponseStatus(HttpStatus.BAD_REQUEST)
+	public ErroResponse tratarRequisicaoInvalida(RuntimeException exception) {
 		return new ErroResponse(exception.getMessage());
 	}
 
-	@ExceptionHandler({UsuarioNaoEncontradoException.class, PostNaoEncontradoException.class})
+	@ExceptionHandler({
+			UsuarioNaoEncontradoException.class,
+			PostNaoEncontradoException.class,
+			SalaNaoEncontradaException.class,
+			ReservaNaoEncontradaException.class})
 	@ResponseStatus(HttpStatus.NOT_FOUND)
 	public ErroResponse tratarNaoEncontrado(RuntimeException exception) {
 		return new ErroResponse(exception.getMessage());
 	}
 
-	@ExceptionHandler({EmailDuplicadoException.class, CurtidaDuplicadaException.class})
+	@ExceptionHandler({
+			EmailDuplicadoException.class,
+			CurtidaDuplicadaException.class,
+			ReservaConflitoException.class})
 	@ResponseStatus(HttpStatus.CONFLICT)
 	public ErroResponse tratarConflito(RuntimeException exception) {
+		return new ErroResponse(exception.getMessage());
+	}
+
+	@ExceptionHandler(AcessoNegadoException.class)
+	@ResponseStatus(HttpStatus.FORBIDDEN)
+	public ErroResponse tratarAcessoNegado(AcessoNegadoException exception) {
 		return new ErroResponse(exception.getMessage());
 	}
 
